@@ -67,7 +67,7 @@ const startServer = async () => {
   // } catch (err) {
   //   console.error('Error resetting public schema:', err);
   // }
-  await sequelize.sync({ alter: true }); // Use { force: true } only for initial dev if needed
+  await sequelize.sync(); // Using basic sync to avoid alter/drop constraint issues in Postgres
   console.log('Database synced.');
 
   await seedAdmin();
