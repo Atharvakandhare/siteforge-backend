@@ -67,7 +67,7 @@ const startServer = async () => {
   // } catch (err) {
   //   console.error('Error resetting public schema:', err);
   // }
-  await sequelize.sync(); // Using basic sync to avoid alter/drop constraint issues in Postgres
+  await sequelize.sync(); // Using basic sync to avoid alter/drop constraint issues in Postgres (IPv4 Pooler)
   console.log('Database synced.');
 
   await seedAdmin();

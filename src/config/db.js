@@ -1,22 +1,6 @@
-const dns = require('dns');
-const originalLookup = dns.lookup;
-dns.lookup = function (hostname, options, callback) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = {};
-  }
-  if (hostname && (hostname.includes('supabase') || hostname.includes('supabase.co'))) {
-    if (options && typeof options === 'object') {
-      options = { ...options, family: 4 };
-    } else {
-      options = { family: 4 };
-    }
-  }
-  return originalLookup.call(dns, hostname, options, callback);
-};
-dns.setDefaultResultOrder('ipv4first');
-
 const { Sequelize } = require('sequelize');
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
