@@ -1,0 +1,80 @@
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
+
+const { connectDB, sequelize } = require('./config/db');
+const { User } = require('./models');
+
+const app = express();
+
+// Middleware
+app.use(helmet()); // Security headers
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Rate Limiting to prevent API abuse
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: 'Too many requests from this IP, please try again after 15 minutes'
+});
+app.use('/api/', limiter);
+
+// Basic Route
+app.get('/', (req, res) => {
+  res.send('Machines App API is running...');
+});
+
+// Routes
+app.use('/api/auth', require('./routes/auth.routes.js'));
+app.use('/api/machines', require('./routes/machine.routes.js'));
+app.use('/api/owner', require('./routes/owner.routes.js'));
+app.use('/api/bookings', require('./routes/booking.routes.js'));
+app.use('/api/receipts', require('./routes/receipt.routes.js'));
+app.use('/api/admin', require('./routes/admin.routes.js'));
+
+// Seed System Admin
+const seedAdmin = async () => {
+  try {
+    const adminExists = await User.findOne({ where: { email: 'atharvakandhare101@gmail.com' } });
+    if (!adminExists) {
+      await User.create({
+        name: 'System Admin',
+        email: 'atharvakandhare101@gmail.com',
+        password: 'systemadmin@1203',
+        role: 'ADMIN'
+      });
+      console.log('Default System Admin created.');
+    }
+  } catch (error) {
+    console.error('Error seeding admin:', error);
+  }
+};
+
+// Start Server
+const PORT = process.env.PORT || 80;
+
+const startServer = async () => {
+  await connectDB();
+  
+  // Sync Database
+  // try {
+  //   await sequelize.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
+  //   console.log('Database public schema reset completed.');
+  // } catch (err) {
+  //   console.error('Error resetting public schema:', err);
+  // }
+  await sequelize.sync({ alter: true }); // Use { force: true } only for initial dev if needed
+  console.log('Database synced.');
+
+  await seedAdmin();
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
+
+startServer();
