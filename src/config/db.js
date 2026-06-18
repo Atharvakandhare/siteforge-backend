@@ -1,4 +1,6 @@
 const { Sequelize } = require('sequelize');
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
