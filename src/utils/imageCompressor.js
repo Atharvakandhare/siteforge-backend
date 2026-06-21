@@ -1,4 +1,4 @@
-const Jimp = require('jimp');
+const { Jimp } = require('jimp');
 
 /**
  * Compresses a Base64-encoded image string using Jimp.
@@ -44,15 +44,17 @@ async function compressBase64Image(base64Str, maxWidth = 800, quality = 80) {
     const image = await Jimp.read(buffer);
 
     // Resize image if it exceeds maximum width (maintaining aspect ratio)
-    if (image.bitmap.width > maxWidth) {
-      await image.resize(maxWidth, Jimp.AUTO);
+    if (image.width > maxWidth) {
+      image.resize({ w: maxWidth });
     }
 
-    // Apply JPEG compression quality
-    await image.quality(quality);
+    // Create a solid white background image of the same size to flatten transparency to white
+    // instead of defaulting to black in the JPEG output
+    const whiteBg = new Jimp({ width: image.width, height: image.height, color: 0xFFFFFFFF });
+    whiteBg.composite(image, 0, 0);
 
     // Get the JPEG buffer (converting to JPEG is highly optimal for database storage size)
-    const compressedBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+    const compressedBuffer = await whiteBg.getBuffer('image/jpeg', { quality: quality });
     const compressedBase64 = compressedBuffer.toString('base64');
 
     // Return with the standard JPEG data URI scheme prefix

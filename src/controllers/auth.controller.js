@@ -115,10 +115,23 @@ exports.getMe = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone, companyName, gstNumber, panNumber, companyAddress, companyPhone, bankName, bankBranch, bankAccountNumber, bankIfscCode, companyLogo, companyStamp, ownerSignature, companyTagline, preferredLanguage } = req.body;
+    const { name, phone, companyName, gstNumber, panNumber, companyAddress, companyPhone, bankName, bankBranch, bankAccountNumber, bankIfscCode, companyLogo, companyStamp, ownerSignature, companyTagline, preferredLanguage, bankAccounts, phones } = req.body;
     const user = await User.findByPk(req.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Validate phones array if passed
+    if (phones !== undefined) {
+      if (!Array.isArray(phones)) {
+        return res.status(400).json({ message: 'Phones must be an array' });
+      }
+      for (const p of phones) {
+        if (typeof p !== 'string' || !/^\d{10}$/.test(p)) {
+          return res.status(400).json({ message: 'Mobile number must be exactly 10 digits' });
+        }
+      }
+      user.phones = phones;
     }
 
     if (name !== undefined) user.name = name;
@@ -132,6 +145,12 @@ exports.updateProfile = async (req, res) => {
     if (bankBranch !== undefined) user.bankBranch = bankBranch;
     if (bankAccountNumber !== undefined) user.bankAccountNumber = bankAccountNumber;
     if (bankIfscCode !== undefined) user.bankIfscCode = bankIfscCode;
+    if (bankAccounts !== undefined) {
+      if (!Array.isArray(bankAccounts)) {
+        return res.status(400).json({ message: 'Bank accounts must be an array' });
+      }
+      user.bankAccounts = bankAccounts;
+    }
     if (companyLogo !== undefined) {
       user.companyLogo = companyLogo ? await compressBase64Image(companyLogo) : null;
     }
@@ -167,7 +186,9 @@ exports.updateProfile = async (req, res) => {
         companyStamp: user.companyStamp,
         ownerSignature: user.ownerSignature,
         companyTagline: user.companyTagline,
-        preferredLanguage: user.preferredLanguage
+        preferredLanguage: user.preferredLanguage,
+        bankAccounts: user.bankAccounts,
+        phones: user.phones
       }
     });
   } catch (error) {

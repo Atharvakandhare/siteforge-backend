@@ -4,7 +4,8 @@ const {
   getMyReceipts,
   getCustomerReceipts,
   updateReceiptStatus,
-  getAnalytics
+  getAnalytics,
+  deleteReceipt
 } = require('../controllers/receipt.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -15,5 +16,6 @@ router.get('/owner', protect, authorize('OWNER'), getMyReceipts);
 router.get('/owner/analytics', protect, authorize('OWNER'), getAnalytics);
 router.get('/customer', protect, authorize('CUSTOMER'), getCustomerReceipts);
 router.put('/:id', protect, authorize('OWNER'), updateReceiptStatus);
+router.delete('/:id', protect, authorize('OWNER'), deleteReceipt);
 
 module.exports = router;

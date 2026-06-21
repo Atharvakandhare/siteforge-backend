@@ -100,6 +100,16 @@ const User = sequelize.define('User', {
     type: DataTypes.UUID,
     allowNull: true
   },
+  bankAccounts: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  phones: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
   preferredLanguage: {
     type: DataTypes.STRING,
     defaultValue: 'en',

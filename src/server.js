@@ -55,10 +55,18 @@ const seedAdmin = async () => {
 };
 
 // Start Server
-const PORT = process.env.PORT || 80;
-
 const startServer = async () => {
+  const PORT = process.env.PORT || 80;
   await connectDB();
+  
+  // Add columns to Users table dynamically if they don't exist
+  try {
+    await sequelize.query('ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "bankAccounts" JSONB DEFAULT \'[]\'::jsonb;');
+    await sequelize.query('ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "phones" JSONB DEFAULT \'[]\'::jsonb;');
+    console.log('Columns "bankAccounts" and "phones" successfully checked/created.');
+  } catch (err) {
+    console.error('Error creating dynamic columns:', err);
+  }
   
   // Sync Database
   // try {

@@ -56,7 +56,14 @@ exports.createReceipt = async (req, res) => {
     const companyName = req.body.companyName || ownerUser.companyName || '';
     const companyTagline = req.body.companyTagline || ownerUser.companyTagline || '';
     const companyAddress = req.body.companyAddress || ownerUser.companyAddress || '';
-    const companyPhone = req.body.companyPhone || ownerUser.companyPhone || ownerUser.phone || '';
+    let companyPhone = req.body.companyPhone;
+    if (!companyPhone) {
+      if (ownerUser.phones && Array.isArray(ownerUser.phones) && ownerUser.phones.length > 0) {
+        companyPhone = ownerUser.phones.join(', ');
+      } else {
+        companyPhone = ownerUser.companyPhone || ownerUser.phone || '';
+      }
+    }
     const ownerGst = req.body.ownerGst || ownerUser.gstNumber || '';
     const ownerPan = req.body.ownerPan || ownerUser.panNumber || '';
     const bankName = req.body.bankName || ownerUser.bankName || '';
@@ -241,6 +248,24 @@ exports.getAnalytics = async (req, res) => {
         pendingAmount: parseFloat(pendingAmount.toFixed(2))
       }
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.deleteReceipt = async (req, res) => {
+  try {
+    const receipt = await Receipt.findByPk(req.params.id);
+    if (!receipt) {
+      return res.status(404).json({ message: 'Receipt not found' });
+    }
+
+    if (receipt.ownerId !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized to delete this receipt' });
+    }
+
+    await receipt.destroy();
+    res.status(200).json({ success: true, message: 'Receipt deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
