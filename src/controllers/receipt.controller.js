@@ -75,6 +75,13 @@ exports.createReceipt = async (req, res) => {
       companyLogo = req.body.companyLogo ? await compressBase64Image(req.body.companyLogo) : null;
     }
 
+    let companyLogoRight = ownerUser.companyLogoRight || null;
+    if (req.body.companyLogoRight !== undefined) {
+      companyLogoRight = req.body.companyLogoRight ? await compressBase64Image(req.body.companyLogoRight) : null;
+    }
+
+    const termsAndConditions = req.body.termsAndConditions !== undefined ? req.body.termsAndConditions : (ownerUser.termsAndConditions || []);
+
     let companyStamp = ownerUser.companyStamp || null;
     if (req.body.companyStamp !== undefined) {
       companyStamp = req.body.companyStamp ? await compressBase64Image(req.body.companyStamp) : null;
@@ -125,8 +132,10 @@ exports.createReceipt = async (req, res) => {
       bankAccountNumber,
       bankIfscCode,
       companyLogo,
+      companyLogoRight,
       companyStamp,
       ownerSignature,
+      termsAndConditions,
       isConsolidated: req.body.isConsolidated || false,
       consolidatedSites: req.body.consolidatedSites || [],
       additionalParts: req.body.additionalParts || [],

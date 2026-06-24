@@ -140,6 +140,15 @@ const Receipt = sequelize.define('Receipt', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  companyLogoRight: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  termsAndConditions: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
   companyStamp: {
     type: DataTypes.TEXT,
     allowNull: true

@@ -15,6 +15,16 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`[API REQUEST] ${req.method} ${req.originalUrl} - Status: ${res.statusCode} (${duration}ms)`);
+  });
+  next();
+});
+
 // Rate Limiting to prevent API abuse
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -63,7 +73,12 @@ const startServer = async () => {
   try {
     await sequelize.query('ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "bankAccounts" JSONB DEFAULT \'[]\'::jsonb;');
     await sequelize.query('ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "phones" JSONB DEFAULT \'[]\'::jsonb;');
-    console.log('Columns "bankAccounts" and "phones" successfully checked/created.');
+    
+    // Drop outdated termsAndConditions TEXT column if exists to allow JSONB sync
+    await sequelize.query('ALTER TABLE "Users" DROP COLUMN IF EXISTS "termsAndConditions";');
+    await sequelize.query('ALTER TABLE "Receipts" DROP COLUMN IF EXISTS "termsAndConditions";');
+    
+    console.log('Columns successfully checked/created/cleaned.');
   } catch (err) {
     console.error('Error creating dynamic columns:', err);
   }

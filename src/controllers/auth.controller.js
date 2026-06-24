@@ -115,7 +115,7 @@ exports.getMe = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone, companyName, gstNumber, panNumber, companyAddress, companyPhone, bankName, bankBranch, bankAccountNumber, bankIfscCode, companyLogo, companyStamp, ownerSignature, companyTagline, preferredLanguage, bankAccounts, phones } = req.body;
+    const { name, phone, companyName, gstNumber, panNumber, companyAddress, companyPhone, bankName, bankBranch, bankAccountNumber, bankIfscCode, companyLogo, companyLogoRight, companyStamp, ownerSignature, companyTagline, preferredLanguage, bankAccounts, phones, termsAndConditions } = req.body;
     const user = await User.findByPk(req.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -154,6 +154,9 @@ exports.updateProfile = async (req, res) => {
     if (companyLogo !== undefined) {
       user.companyLogo = companyLogo ? await compressBase64Image(companyLogo) : null;
     }
+    if (companyLogoRight !== undefined) {
+      user.companyLogoRight = companyLogoRight ? await compressBase64Image(companyLogoRight) : null;
+    }
     if (companyStamp !== undefined) {
       user.companyStamp = companyStamp ? await compressBase64Image(companyStamp) : null;
     }
@@ -162,6 +165,7 @@ exports.updateProfile = async (req, res) => {
     }
     if (companyTagline !== undefined) user.companyTagline = companyTagline;
     if (preferredLanguage !== undefined) user.preferredLanguage = preferredLanguage;
+    if (termsAndConditions !== undefined) user.termsAndConditions = termsAndConditions;
 
     await user.save();
 
@@ -183,12 +187,14 @@ exports.updateProfile = async (req, res) => {
         bankAccountNumber: user.bankAccountNumber,
         bankIfscCode: user.bankIfscCode,
         companyLogo: user.companyLogo,
+        companyLogoRight: user.companyLogoRight,
         companyStamp: user.companyStamp,
         ownerSignature: user.ownerSignature,
         companyTagline: user.companyTagline,
         preferredLanguage: user.preferredLanguage,
         bankAccounts: user.bankAccounts,
-        phones: user.phones
+        phones: user.phones,
+        termsAndConditions: user.termsAndConditions
       }
     });
   } catch (error) {

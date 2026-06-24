@@ -84,6 +84,15 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  companyLogoRight: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  termsAndConditions: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
   companyTagline: {
     type: DataTypes.STRING,
     allowNull: true
